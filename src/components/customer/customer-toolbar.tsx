@@ -34,7 +34,7 @@ export default function CustomerToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search customers..."
-          className="pl-10"
+          className="pl-10 text-white"
         />
       </div>
 
@@ -59,7 +59,9 @@ export default function CustomerToolbar({
           <option value="recent">Recently Added</option>
         </select>
 
-        <Button className="cursor-pointer">Export</Button>
+        <Button className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">
+          Export
+        </Button>
       </div>
     </div>
   );

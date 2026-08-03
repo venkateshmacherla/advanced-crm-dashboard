@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
+import AddCustomerDialog from "./add-customer-dialog";
+
 export default function CustomerPageHeader() {
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -14,10 +16,7 @@ export default function CustomerPageHeader() {
         </p>
       </div>
 
-      <Button className="gap-2 cursor-pointer">
-        <Plus size={18} />
-        Add Customer
-      </Button>
+      <AddCustomerDialog />
     </div>
   );
 }

@@ -1,36 +1,69 @@
 import { customers } from "@/data/customers";
 import { Customer } from "@/types/customer";
 
+const STORAGE_KEY = "crm-customers";
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-let customerList = [...customers];
+function getStoredCustomers(): Customer[] {
+  if (typeof window === "undefined") {
+    return [...customers];
+  }
+
+  const storedCustomers = localStorage.getItem(STORAGE_KEY);
+
+  if (!storedCustomers) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
+    return [...customers];
+  }
+
+  return JSON.parse(storedCustomers);
+}
+
+function saveCustomers(customerList: Customer[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customerList));
+}
 
 export async function getCustomers(): Promise<Customer[]> {
-  await delay(500);
+  await delay(300);
 
-  return [...customerList];
+  return getStoredCustomers();
 }
 
 export async function addCustomer(customer: Customer): Promise<Customer> {
-  await delay(500);
+  await delay(300);
+
+  const customerList = getStoredCustomers();
 
   customerList.unshift(customer);
+
+  saveCustomers(customerList);
 
   return customer;
 }
 
 export async function updateCustomer(customer: Customer): Promise<Customer> {
-  await delay(500);
+  await delay(300);
 
-  customerList = customerList.map((item) =>
+  const customerList = getStoredCustomers().map((item) =>
     item.id === customer.id ? customer : item,
   );
+
+  saveCustomers(customerList);
 
   return customer;
 }
 
 export async function deleteCustomer(id: string): Promise<void> {
-  await delay(500);
+  await delay(300);
 
-  customerList = customerList.filter((customer) => customer.id !== id);
+  const customerList = getStoredCustomers().filter(
+    (customer) => customer.id !== id,
+  );
+
+  saveCustomers(customerList);
+}
+
+export function resetCustomers() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
 }

@@ -13,6 +13,7 @@ import CustomerEmptyState from "./customer-empty-state";
 import CustomerStatusBadge from "./customer-status-badge";
 
 import { Customer } from "@/types/customer";
+import { Button } from "../ui/button";
 
 interface CustomerTableProps {
   customers: Customer[];
@@ -47,6 +48,7 @@ export default function CustomerTable({
             <TableHead className="text-slate-300">Company</TableHead>
             <TableHead className="text-slate-300">Status</TableHead>
             <TableHead className="text-slate-300">Last Contact</TableHead>
+            <TableHead className="text-right text-slate-300">Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -76,6 +78,24 @@ export default function CustomerTable({
 
               <TableCell className="text-slate-300">
                 {customer.lastContact}
+              </TableCell>
+
+              <TableCell className="text-right">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mr-2 cursor-pointer bg-slate-700 text-white border-slate-600"
+                >
+                  Edit
+                </Button>
+
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="cursor-pointer"
+                >
+                  Delete
+                </Button>
               </TableCell>
             </TableRow>
           ))}
