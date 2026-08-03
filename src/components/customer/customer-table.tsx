@@ -1,5 +1,7 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import {
   Table,
   TableBody,
@@ -12,18 +14,52 @@ import {
 import CustomerEmptyState from "./customer-empty-state";
 import CustomerStatusBadge from "./customer-status-badge";
 
+import { customerService } from "@/services/customer.service";
 import { Customer } from "@/types/customer";
 import { Button } from "../ui/button";
+
+import { toast } from "sonner";
 
 interface CustomerTableProps {
   customers: Customer[];
   isLoading: boolean;
+  onEdit: (customer: Customer) => void;
 }
 
 export default function CustomerTable({
   customers,
   isLoading,
+  onEdit,
 }: CustomerTableProps) {
+  const queryClient = useQueryClient();
+
+  const handleDelete = async (id: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this customer?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await customerService.deleteCustomer(id);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["customers"],
+      });
+
+      await queryClient.refetchQueries({
+        queryKey: ["customers"],
+      });
+
+      toast.success("Customer deleted successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete customer.");
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="rounded-xl border border-slate-800 bg-slate-900 p-8 text-center text-slate-400">
@@ -56,35 +92,30 @@ export default function CustomerTable({
           {customers.map((customer, index) => (
             <TableRow
               key={customer.id}
-              className="cursor-pointer transition-colors hover:bg-slate-800"
+              className="transition-colors hover:bg-slate-800"
             >
-              <TableCell className="text-slate-400">{index + 1}</TableCell>
+              <TableCell>{index + 1}</TableCell>
 
-              <TableCell className="font-medium text-white">
-                {customer.name}
-              </TableCell>
+              <TableCell className="font-medium">{customer.name}</TableCell>
 
-              <TableCell className="text-slate-300">{customer.email}</TableCell>
+              <TableCell>{customer.email}</TableCell>
 
-              <TableCell className="text-slate-300">{customer.phone}</TableCell>
+              <TableCell>{customer.phone}</TableCell>
 
-              <TableCell className="text-slate-300">
-                {customer.company}
-              </TableCell>
+              <TableCell>{customer.company}</TableCell>
 
               <TableCell>
                 <CustomerStatusBadge status={customer.status} />
               </TableCell>
 
-              <TableCell className="text-slate-300">
-                {customer.lastContact}
-              </TableCell>
+              <TableCell>{customer.lastContact}</TableCell>
 
               <TableCell className="text-right">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mr-2 cursor-pointer bg-slate-700 text-white border-slate-600"
+                  className="mr-2 cursor-pointer border-slate-600 bg-slate-700 text-white hover:bg-slate-600"
+                  onClick={() => onEdit(customer)}
                 >
                   Edit
                 </Button>
@@ -93,6 +124,7 @@ export default function CustomerTable({
                   variant="destructive"
                   size="sm"
                   className="cursor-pointer"
+                  onClick={() => handleDelete(customer.id)}
                 >
                   Delete
                 </Button>

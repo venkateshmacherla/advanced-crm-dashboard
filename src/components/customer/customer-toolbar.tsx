@@ -12,6 +12,7 @@ interface CustomerToolbarProps {
   onSearchChange: (value: string) => void;
   onStatusChange: (value: string) => void;
   onSortChange: (value: string) => void;
+  onExport: () => void;
 }
 
 export default function CustomerToolbar({
@@ -21,9 +22,11 @@ export default function CustomerToolbar({
   onSearchChange,
   onStatusChange,
   onSortChange,
+  onExport,
 }: CustomerToolbarProps) {
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-slate-900 p-5 lg:flex-row lg:items-center lg:justify-between">
+      <h3 className="mb-2 text-lg font-semibold text-white">Customers</h3>
       <div className="relative w-full max-w-md">
         <Search
           size={18}
@@ -59,7 +62,10 @@ export default function CustomerToolbar({
           <option value="recent">Recently Added</option>
         </select>
 
-        <Button className="bg-blue-600 text-white hover:bg-blue-700 cursor-pointer">
+        <Button
+          className="cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
+          onClick={onExport}
+        >
           Export
         </Button>
       </div>

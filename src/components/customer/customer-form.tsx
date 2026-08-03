@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,38 +15,71 @@ import { customerFormDefaults } from "./customer-form-defaults";
 import { customerService } from "@/services/customer.service";
 import { Customer } from "@/types/customer";
 
+import { toast } from "sonner";
+
 interface CustomerFormProps {
+  customer?: Customer | null;
   onClose: () => void;
 }
 
-export default function CustomerForm({ onClose }: CustomerFormProps) {
+export default function CustomerForm({ customer, onClose }: CustomerFormProps) {
   const queryClient = useQueryClient();
 
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
     defaultValues: customerFormDefaults,
   });
 
-  const onSubmit = async (data: CustomerFormData) => {
-    const newCustomer: Customer = {
-      id: crypto.randomUUID(),
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      company: data.company,
-      status: data.status,
-      notes: data.notes ?? "",
-      lastContact: new Date().toISOString().split("T")[0],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+  useEffect(() => {
+    if (customer) {
+      reset({
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        company: customer.company,
+        status: customer.status,
+        notes: customer.notes,
+      });
+    } else {
+      reset(customerFormDefaults);
+    }
+  }, [customer, reset]);
 
+  const onSubmit = async (data: CustomerFormData) => {
     try {
-      await customerService.addCustomer(newCustomer);
+      if (customer) {
+        const updatedCustomer: Customer = {
+          ...customer,
+          ...data,
+          updatedAt: new Date().toISOString(),
+        };
+
+        await customerService.updateCustomer(updatedCustomer);
+
+        toast.success("Customer updated successfully!");
+      } else {
+        const newCustomer: Customer = {
+          id: crypto.randomUUID(),
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          company: data.company,
+          status: data.status,
+          notes: data.notes ?? "",
+          lastContact: new Date().toISOString().split("T")[0],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        await customerService.addCustomer(newCustomer);
+
+        toast.success("Customer added successfully!");
+      }
 
       await queryClient.invalidateQueries({
         queryKey: ["customers"],
@@ -55,12 +89,10 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
         queryKey: ["customers"],
       });
 
-      alert("Customer added successfully!");
-
       onClose();
     } catch (error) {
       console.error(error);
-      alert("Failed to add customer.");
+      toast.error("Something went wrong.");
     }
   };
 
@@ -68,7 +100,7 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-200">
-          Name
+          Name *
         </label>
 
         <Input {...register("name")} placeholder="Enter customer name" />
@@ -80,7 +112,7 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-200">
-          Email
+          Email *
         </label>
 
         <Input type="email" {...register("email")} placeholder="Enter email" />
@@ -92,10 +124,19 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-200">
-          Phone
+          Phone *
         </label>
 
-        <Input {...register("phone")} placeholder="Enter phone" />
+        <Input
+          {...register("phone")}
+          type="tel"
+          maxLength={10}
+          inputMode="numeric"
+          placeholder="Enter phone"
+          onInput={(e) => {
+            e.currentTarget.value = e.currentTarget.value.replace(/\D/g, "");
+          }}
+        />
 
         {errors.phone && (
           <p className="mt-1 text-sm text-red-500">{errors.phone.message}</p>
@@ -104,7 +145,7 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
 
       <div>
         <label className="mb-2 block text-sm font-medium text-slate-200">
-          Company
+          Company *
         </label>
 
         <Input {...register("company")} placeholder="Enter company" />
@@ -121,7 +162,7 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
 
         <select
           {...register("status")}
-          className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-white outline-none"
+          className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-white"
         >
           <option value="Active">Active</option>
           <option value="Inactive">Inactive</option>
@@ -133,15 +174,15 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-white">
+        <label className="mb-2 block text-sm font-medium text-slate-200">
           Notes
         </label>
 
         <Textarea
           rows={4}
-          className="text-white"
           {...register("notes")}
           placeholder="Enter notes"
+          className="text-white"
         />
       </div>
 
@@ -149,8 +190,8 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
         <Button
           type="button"
           variant="outline"
+          className="cursor-pointer bg-grey-500"
           onClick={onClose}
-          className="cursor-pointer"
         >
           Cancel
         </Button>
@@ -159,7 +200,7 @@ export default function CustomerForm({ onClose }: CustomerFormProps) {
           type="submit"
           className="cursor-pointer bg-blue-600 text-white hover:bg-blue-700"
         >
-          Save Customer
+          {customer ? "Update Customer" : "Save Customer"}
         </Button>
       </div>
     </form>
