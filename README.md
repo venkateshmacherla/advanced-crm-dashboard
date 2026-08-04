@@ -1,36 +1,226 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Advanced CRM Dashboard
 
-## Getting Started
+A modern Customer Relationship Management (CRM) Dashboard built with Next.js, TypeScript, Tailwind CSS, and TanStack Query. This project helps manage customer information with features like search, filters, pagination, CRUD operations, export, and dashboard analytics.
 
-First, run the development server:
+---
+
+## Live Demo
+
+**Live URL:** Add your Vercel link here
+
+Example:
+https://your-project.vercel.app
+
+---
+
+## GitHub Repository
+
+Add your GitHub repository link here.
+
+Example:
+https://github.com/your-username/advanced-crm-dashboard
+
+---
+
+## Features
+
+### Dashboard
+
+- Dashboard overview with customer statistics
+- Recently contacted customers
+- Responsive dashboard layout
+- Dark mode support
+
+### Customer Management
+
+- View customer list
+- Add new customer
+- Edit customer details
+- Delete customer
+- Customer detail drawer
+- Duplicate email validation
+- Duplicate phone validation
+
+### Search & Filters
+
+- Debounced search
+- Filter customers by status
+- Advanced filter panel
+- Saved filter support
+- Clear filters
+
+### Table Features
+
+- Sorting
+- Pagination
+- Bulk selection
+- Export customer data to CSV
+
+### Form Validation
+
+- React Hook Form
+- Zod validation
+- Email validation
+- Phone validation
+- Required field validation
+- Success and error toast notifications
+
+### Data Handling
+
+- TanStack Query
+- Mock API
+- Local Storage persistence
+- Optimized data fetching
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS v4
+
+### UI
+
+- shadcn/ui
+- Lucide React
+- Sonner
+
+### State Management
+
+- TanStack Query
+
+### Forms
+
+- React Hook Form
+- Zod
+
+### Development Tools
+
+- ESLint
+- Prettier
+
+---
+
+## Folder Structure
+
+```text
+src
+│
+├── app
+├── components
+│   ├── customer
+│   ├── layout
+│   ├── providers
+│   └── ui
+│
+├── hooks
+├── services
+├── data
+├── types
+├── constants
+└── lib
+```
+
+---
+
+## Installation
+
+Clone the repository
+
+```bash
+git clone <repository-url>
+```
+
+Go to the project folder
+
+```bash
+cd advanced-crm-dashboard
+```
+
+Install dependencies
+
+```bash
+npm install
+```
+
+Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Run Production
 
-## Deploy on Vercel
+```bash
+npm start
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project Highlights
+
+- Clean and reusable component architecture
+- Responsive design
+- Type-safe development using TypeScript
+- Form validation with Zod
+- Optimized state management using TanStack Query
+- Local Storage based mock backend
+- CSV export functionality
+- Dark mode support
+- User-friendly toast notifications
+
+---
+
+## Future Improvements
+
+- Real backend integration
+- JWT Authentication
+- Role-based access
+- Drag and Drop customer management
+- Unit testing
+- API integration
+
+---
+
+## Author
+
+**Venkatesh Macharla**
+
+Frontend Developer
+
+GitHub:
+[(Add your GitHub profile)](https://github.com/venkateshmacherla)
+
+LinkedIn:
+[(Add your LinkedIn profile)](https://www.linkedin.com/in/venkatesh-macharla-2699b7227/)
+
+Email:
+macherlavenkatesh5@gmail.com
+
+---
+
+## Thank You
+
+Thank you for reviewing my assignment.
+
+I enjoyed building this CRM Dashboard and focused on writing clean, reusable, and maintainable code while implementing the required features.

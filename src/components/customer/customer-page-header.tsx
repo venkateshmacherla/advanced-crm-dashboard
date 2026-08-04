@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-
 import AddCustomerDialog from "./add-customer-dialog";
 
 export default function CustomerPageHeader() {
