@@ -25,7 +25,7 @@ export default function CustomerPagination({
         <select
           value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
-          className="h-9 cursor-pointer rounded-md border border-slate-700 bg-slate-900 px-2 text-sm text-slate-200 outline-none focus:border-blue-500"
+          className="h-9 cursor-pointer rounded-md border-2 border-slate-700 bg-slate-900 px-2 text-sm text-slate-200 outline-none focus:border-blue-500"
         >
           <option value={10}>10</option>
           <option value={25}>25</option>
@@ -37,7 +37,7 @@ export default function CustomerPagination({
         <>
           <Button
             variant="outline"
-            className="cursor-pointer bg-grey-300"
+            className="cursor-pointer bg-grey-300 border-2"
             disabled={currentPage === 1}
             onClick={() => onPageChange(currentPage - 1)}
           >
@@ -50,7 +50,7 @@ export default function CustomerPagination({
                 key={index}
                 size="sm"
                 variant={currentPage === index + 1 ? "default" : "outline"}
-                className="cursor-pointer bg-grey-300"
+                className="cursor-pointer bg-grey-300 border-2"
                 onClick={() => onPageChange(index + 1)}
               >
                 {index + 1}
@@ -60,7 +60,7 @@ export default function CustomerPagination({
 
           <Button
             variant="outline"
-            className="cursor-pointer bg-grey-300"
+            className="cursor-pointer bg-grey-300 border-2"
             disabled={currentPage === totalPages}
             onClick={() => onPageChange(currentPage + 1)}
           >

@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import CustomerEmptyState from "./customer-empty-state";
 import CustomerStatusBadge from "./customer-status-badge";
@@ -22,6 +23,9 @@ interface CustomerTableProps {
   isLoading: boolean;
   onEdit: (customer: Customer) => void;
   onView: (customer: Customer) => void;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+  onToggleSelectAll: (ids: string[]) => void;
 }
 
 export default function CustomerTable({
@@ -29,6 +33,9 @@ export default function CustomerTable({
   isLoading,
   onEdit,
   onView,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
 }: CustomerTableProps) {
   const deleteCustomer = useDeleteCustomer();
 
@@ -56,11 +63,22 @@ export default function CustomerTable({
     return <CustomerEmptyState />;
   }
 
+  const pageIds = customers.map((c) => c.id);
+  const allOnPageSelected = pageIds.every((id) => selectedIds.has(id));
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
       <Table className="text-slate-200">
         <TableHeader className="bg-slate-950">
           <TableRow>
+            <TableHead className="w-10">
+              <Checkbox
+                checked={allOnPageSelected}
+                onCheckedChange={() => onToggleSelectAll(pageIds)}
+                className="border-slate-600 bg-slate-800"
+                aria-label="Select all customers on this page"
+              />
+            </TableHead>
             <TableHead className="w-16 text-slate-300">#</TableHead>
             <TableHead className="text-slate-300">Name</TableHead>
             <TableHead className="text-slate-300">Email</TableHead>
@@ -73,58 +91,72 @@ export default function CustomerTable({
         </TableHeader>
 
         <TableBody>
-          {customers.map((customer, index) => (
-            <TableRow
-              key={customer.id}
-              className="cursor-pointer transition-colors hover:bg-slate-800"
-              onClick={() => onView(customer)}
-            >
-              <TableCell>{index + 1}</TableCell>
+          {customers.map((customer, index) => {
+            const isSelected = selectedIds.has(customer.id);
 
-              <TableCell className="font-medium">
-                <div className="flex items-center gap-3">
-                  <CustomerAvatar name={customer.name} size="sm" />
-                  {customer.name}
-                </div>
-              </TableCell>
-
-              <TableCell>{customer.email}</TableCell>
-
-              <TableCell>{customer.phone}</TableCell>
-
-              <TableCell>{customer.company}</TableCell>
-
-              <TableCell>
-                <CustomerStatusBadge status={customer.status} />
-              </TableCell>
-
-              <TableCell>{customer.lastContact}</TableCell>
-
-              <TableCell
-                className="text-right"
-                onClick={(e) => e.stopPropagation()}
+            return (
+              <TableRow
+                key={customer.id}
+                data-state={isSelected ? "selected" : undefined}
+                className="cursor-pointer transition-colors hover:bg-slate-800"
+                onClick={() => onView(customer)}
               >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mr-2 cursor-pointer border-slate-600 bg-slate-700 text-white hover:bg-slate-600"
-                  onClick={() => onEdit(customer)}
-                >
-                  Edit
-                </Button>
+                <TableCell onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={() => onToggleSelect(customer.id)}
+                    className="border-slate-600 bg-slate-800"
+                    aria-label={`Select ${customer.name}`}
+                  />
+                </TableCell>
 
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="cursor-pointer"
-                  disabled={deleteCustomer.isPending}
-                  onClick={() => handleDelete(customer.id)}
+                <TableCell>{index + 1}</TableCell>
+
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-3">
+                    <CustomerAvatar name={customer.name} size="sm" />
+                    {customer.name}
+                  </div>
+                </TableCell>
+
+                <TableCell>{customer.email}</TableCell>
+
+                <TableCell>{customer.phone}</TableCell>
+
+                <TableCell>{customer.company}</TableCell>
+
+                <TableCell>
+                  <CustomerStatusBadge status={customer.status} />
+                </TableCell>
+
+                <TableCell>{customer.lastContact}</TableCell>
+
+                <TableCell
+                  className="text-right"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  Delete
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mr-2 cursor-pointer border-slate-600 bg-slate-700 text-white hover:bg-slate-600"
+                    onClick={() => onEdit(customer)}
+                  >
+                    Edit
+                  </Button>
+
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="cursor-pointer"
+                    disabled={deleteCustomer.isPending}
+                    onClick={() => handleDelete(customer.id)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

@@ -1,5 +1,7 @@
 import {
   addCustomer,
+  bulkDeleteCustomers,
+  bulkUpdateStatus,
   deleteCustomer,
   getCustomers,
   updateCustomer,
@@ -20,5 +22,13 @@ export const customerService = {
 
   deleteCustomer(id: string) {
     return deleteCustomer(id);
+  },
+
+  bulkDeleteCustomers(ids: string[]) {
+    return bulkDeleteCustomers(ids);
+  },
+
+  bulkUpdateStatus(ids: string[], status: Customer["status"]) {
+    return bulkUpdateStatus(ids, status);
   },
 };

@@ -75,3 +75,30 @@ export async function deleteCustomer(id: string): Promise<void> {
 export function resetCustomers() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
 }
+
+export async function bulkDeleteCustomers(ids: string[]): Promise<void> {
+  await delay(300);
+
+  const idSet = new Set(ids);
+  const customerList = getStoredCustomers().filter(
+    (customer) => !idSet.has(customer.id),
+  );
+
+  saveCustomers(customerList);
+}
+
+export async function bulkUpdateStatus(
+  ids: string[],
+  status: Customer["status"],
+): Promise<void> {
+  await delay(300);
+
+  const idSet = new Set(ids);
+  const customerList = getStoredCustomers().map((customer) =>
+    idSet.has(customer.id)
+      ? { ...customer, status, updatedAt: new Date().toISOString() }
+      : customer,
+  );
+
+  saveCustomers(customerList);
+}

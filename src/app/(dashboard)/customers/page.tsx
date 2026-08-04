@@ -10,9 +10,11 @@ import CustomerPagination from "@/components/customer/customer-pagination";
 import AddCustomerDialog from "@/components/customer/add-customer-dialog";
 import FilterPanel from "@/components/customer/filter-panel";
 import CustomerDetailDrawer from "@/components/customer/customer-detail-drawer";
+import CustomerBulkActionsBar from "@/components/customer/customer-bulk-actions-bar";
 
 import { useCustomers } from "@/hooks/useCustomers";
 import { useDeleteCustomer } from "@/hooks/useCustomerMutations";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { Customer } from "@/types/customer";
 import {
   CustomerFilters,
@@ -23,6 +25,8 @@ import { toast } from "sonner";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 300);
+
   const [sortBy, setSortBy] = useState("name");
   const [filters, setFilters] = useState<CustomerFilters>(defaultFilters);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -34,6 +38,9 @@ export default function CustomersPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  // Bulk selection (row ids, spans across pages/filters)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const { data: customers = [], isLoading, isError, error } = useCustomers();
   const deleteCustomer = useDeleteCustomer();
@@ -68,9 +75,9 @@ export default function CustomersPage() {
   const filteredCustomers = useMemo(() => {
     let result = [...customers];
 
-    // Search
-    if (search.trim()) {
-      const keyword = search.toLowerCase().trim();
+    // Search (debounced — filters only re-run 300ms after typing stops)
+    if (debouncedSearch.trim()) {
+      const keyword = debouncedSearch.toLowerCase().trim();
 
       result = result.filter(
         (customer) =>
@@ -146,13 +153,35 @@ export default function CustomersPage() {
     }
 
     return result;
-  }, [customers, search, filters, sortBy]);
+  }, [customers, debouncedSearch, filters, sortBy]);
 
   // Reset page when search/filter/sort/pageSize changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
-  }, [search, filters, sortBy, pageSize]);
+  }, [debouncedSearch, filters, sortBy, pageSize]);
+
+  // Cmd+K / Ctrl+K opens the filters panel from anywhere on the page
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const isTypingTarget =
+        event.target instanceof HTMLElement &&
+        ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName);
+
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setIsFilterPanelOpen(true);
+        return;
+      }
+
+      if (event.key === "Escape" && !isTypingTarget) {
+        setIsFilterPanelOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const totalPages = Math.ceil(filteredCustomers.length / pageSize);
 
@@ -162,6 +191,38 @@ export default function CustomersPage() {
     startIndex,
     startIndex + pageSize,
   );
+
+  // --- Bulk selection helpers ---
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+  };
+
+  const toggleSelectAll = (ids: string[]) => {
+    setSelectedIds((prev) => {
+      const allSelected = ids.every((id) => prev.has(id));
+      const next = new Set(prev);
+
+      if (allSelected) {
+        ids.forEach((id) => next.delete(id));
+      } else {
+        ids.forEach((id) => next.add(id));
+      }
+
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelectedIds(new Set());
 
   const handleExport = () => {
     const headers = [
@@ -257,11 +318,20 @@ export default function CustomersPage() {
         onOpenFilters={() => setIsFilterPanelOpen(true)}
       />
 
+      <CustomerBulkActionsBar
+        selectedCount={selectedIds.size}
+        selectedIds={Array.from(selectedIds)}
+        onClearSelection={clearSelection}
+      />
+
       <CustomerTable
         customers={paginatedCustomers}
         isLoading={isLoading}
         onEdit={setSelectedCustomer}
         onView={setViewingCustomer}
+        selectedIds={selectedIds}
+        onToggleSelect={toggleSelect}
+        onToggleSelectAll={toggleSelectAll}
       />
 
       <CustomerPagination
