@@ -19,10 +19,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         onClose={() => setMobileNavOpen(false)}
       />
 
-      <div className="flex flex-1 flex-col">
+      {/* Content */}
+      <div className="flex min-w-0 flex-1 flex-col">
         <AppHeader onMenuClick={() => setMobileNavOpen(true)} />
 
-        <main className="flex-1 overflow-auto p-6">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-6">
+          {children}
+        </main>
       </div>
     </div>
   );
