@@ -209,10 +209,10 @@ npm start
 Frontend Developer
 
 GitHub:
-[GitHub profile](https://github.com/venkateshmacherla)
+https://github.com/venkateshmacherla
 
 LinkedIn:
-[LinkedIn profile](https://www.linkedin.com/in/venkatesh-macharla-2699b7227/)
+https://www.linkedin.com/in/venkatesh-macharla-2699b7227/
 
 Email:
 macherlavenkatesh5@gmail.com
