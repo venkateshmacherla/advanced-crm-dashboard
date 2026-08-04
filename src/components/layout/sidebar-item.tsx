@@ -9,6 +9,7 @@ interface SidebarItemProps {
   href: string;
   icon: LucideIcon;
   active?: boolean;
+  onNavigate?: () => void;
 }
 
 export default function SidebarItem({
@@ -16,10 +17,12 @@ export default function SidebarItem({
   href,
   icon: Icon,
   active = false,
+  onNavigate,
 }: SidebarItemProps) {
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
         active
