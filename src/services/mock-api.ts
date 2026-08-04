@@ -17,7 +17,15 @@ function getStoredCustomers(): Customer[] {
     return [...customers];
   }
 
-  return JSON.parse(storedCustomers);
+  const parsedCustomers: Customer[] = JSON.parse(storedCustomers);
+
+  // Reset localStorage if mock data has more customers
+  if (parsedCustomers.length < customers.length) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(customers));
+    return [...customers];
+  }
+
+  return parsedCustomers;
 }
 
 function saveCustomers(customerList: Customer[]) {

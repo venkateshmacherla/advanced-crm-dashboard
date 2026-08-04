@@ -1,7 +1,5 @@
 "use client";
 
-import { useQueryClient } from "@tanstack/react-query";
-
 import {
   Table,
   TableBody,
@@ -14,26 +12,26 @@ import {
 import CustomerEmptyState from "./customer-empty-state";
 import CustomerStatusBadge from "./customer-status-badge";
 
-import { customerService } from "@/services/customer.service";
+import { useDeleteCustomer } from "@/hooks/useCustomerMutations";
 import { Customer } from "@/types/customer";
 import { Button } from "../ui/button";
-
-import { toast } from "sonner";
 
 interface CustomerTableProps {
   customers: Customer[];
   isLoading: boolean;
   onEdit: (customer: Customer) => void;
+  onView: (customer: Customer) => void;
 }
 
 export default function CustomerTable({
   customers,
   isLoading,
   onEdit,
+  onView,
 }: CustomerTableProps) {
-  const queryClient = useQueryClient();
+  const deleteCustomer = useDeleteCustomer();
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     const confirmed = window.confirm(
       "Are you sure you want to delete this customer?",
     );
@@ -42,22 +40,7 @@ export default function CustomerTable({
       return;
     }
 
-    try {
-      await customerService.deleteCustomer(id);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["customers"],
-      });
-
-      await queryClient.refetchQueries({
-        queryKey: ["customers"],
-      });
-
-      toast.success("Customer deleted successfully!");
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to delete customer.");
-    }
+    deleteCustomer.mutate(id);
   };
 
   if (isLoading) {
@@ -92,7 +75,8 @@ export default function CustomerTable({
           {customers.map((customer, index) => (
             <TableRow
               key={customer.id}
-              className="transition-colors hover:bg-slate-800"
+              className="cursor-pointer transition-colors hover:bg-slate-800"
+              onClick={() => onView(customer)}
             >
               <TableCell>{index + 1}</TableCell>
 
@@ -110,7 +94,10 @@ export default function CustomerTable({
 
               <TableCell>{customer.lastContact}</TableCell>
 
-              <TableCell className="text-right">
+              <TableCell
+                className="text-right"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <Button
                   variant="outline"
                   size="sm"
@@ -124,6 +111,7 @@ export default function CustomerTable({
                   variant="destructive"
                   size="sm"
                   className="cursor-pointer"
+                  disabled={deleteCustomer.isPending}
                   onClick={() => handleDelete(customer.id)}
                 >
                   Delete

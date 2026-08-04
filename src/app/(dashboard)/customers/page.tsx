@@ -8,25 +8,35 @@ import CustomerTable from "@/components/customer/customer-table";
 import CustomerToolbar from "@/components/customer/customer-toolbar";
 import CustomerPagination from "@/components/customer/customer-pagination";
 import AddCustomerDialog from "@/components/customer/add-customer-dialog";
+import FilterPanel from "@/components/customer/filter-panel";
+import CustomerDetailDrawer from "@/components/customer/customer-detail-drawer";
 
 import { useCustomers } from "@/hooks/useCustomers";
+import { useDeleteCustomer } from "@/hooks/useCustomerMutations";
 import { Customer } from "@/types/customer";
+import {
+  CustomerFilters,
+  countActiveFilters,
+  defaultFilters,
+} from "@/types/filter";
 import { toast } from "sonner";
 
 export default function CustomersPage() {
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("all");
   const [sortBy, setSortBy] = useState("name");
+  const [filters, setFilters] = useState<CustomerFilters>(defaultFilters);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
 
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null,
   );
+  const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const customersPerPage = 5;
-
-  const { data: customers = [], isLoading } = useCustomers();
+  const { data: customers = [], isLoading, isError, error } = useCustomers();
+  const deleteCustomer = useDeleteCustomer();
 
   const totalCustomers = customers.length;
 
@@ -50,6 +60,11 @@ export default function CustomersPage() {
     );
   }).length;
 
+  const companies = useMemo(() => {
+    const unique = new Set(customers.map((customer) => customer.company));
+    return Array.from(unique).sort();
+  }, [customers]);
+
   const filteredCustomers = useMemo(() => {
     let result = [...customers];
 
@@ -65,10 +80,46 @@ export default function CustomersPage() {
       );
     }
 
-    // Status
-    if (status !== "all") {
+    // Status filter (multi-select)
+    if (filters.status.length > 0) {
+      result = result.filter((customer) =>
+        filters.status.includes(customer.status),
+      );
+    }
+
+    // Company filter (multi-select)
+    if (filters.companies.length > 0) {
+      result = result.filter((customer) =>
+        filters.companies.includes(customer.company),
+      );
+    }
+
+    // Date range filter (last contact)
+    if (filters.dateFrom) {
       result = result.filter(
-        (customer) => customer.status.toLowerCase() === status.toLowerCase(),
+        (customer) => customer.lastContact >= filters.dateFrom,
+      );
+    }
+
+    if (filters.dateTo) {
+      result = result.filter(
+        (customer) => customer.lastContact <= filters.dateTo,
+      );
+    }
+
+    // Phone partial match
+    if (filters.phone.trim()) {
+      const phoneKeyword = filters.phone.trim();
+      result = result.filter((customer) =>
+        customer.phone.includes(phoneKeyword),
+      );
+    }
+
+    // Email partial match
+    if (filters.email.trim()) {
+      const emailKeyword = filters.email.toLowerCase().trim();
+      result = result.filter((customer) =>
+        customer.email.toLowerCase().includes(emailKeyword),
       );
     }
 
@@ -76,6 +127,10 @@ export default function CustomersPage() {
     switch (sortBy) {
       case "company":
         result.sort((a, b) => a.company.localeCompare(b.company));
+        break;
+
+      case "email":
+        result.sort((a, b) => a.email.localeCompare(b.email));
         break;
 
       case "recent":
@@ -91,21 +146,21 @@ export default function CustomersPage() {
     }
 
     return result;
-  }, [customers, search, status, sortBy]);
+  }, [customers, search, filters, sortBy]);
 
-  // Reset page when search/filter/sort changes
+  // Reset page when search/filter/sort/pageSize changes
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
-  }, [search, status, sortBy]);
+  }, [search, filters, sortBy, pageSize]);
 
-  const totalPages = Math.ceil(filteredCustomers.length / customersPerPage);
+  const totalPages = Math.ceil(filteredCustomers.length / pageSize);
 
-  const startIndex = (currentPage - 1) * customersPerPage;
+  const startIndex = (currentPage - 1) * pageSize;
 
   const paginatedCustomers = filteredCustomers.slice(
     startIndex,
-    startIndex + customersPerPage,
+    startIndex + pageSize,
   );
 
   const handleExport = () => {
@@ -153,6 +208,34 @@ export default function CustomersPage() {
     toast.success("Customers exported successfully!");
   };
 
+  const handleDeleteFromDrawer = (id: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this customer?",
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    deleteCustomer.mutate(id);
+    setViewingCustomer(null);
+  };
+
+  if (isError) {
+    return (
+      <div className="space-y-8">
+        <CustomerPageHeader />
+
+        <div className="rounded-xl border border-red-900 bg-red-950/40 p-8 text-center text-red-300">
+          <p className="font-medium">Failed to load customers.</p>
+          <p className="mt-1 text-sm text-red-400">
+            {error instanceof Error ? error.message : "Please try again."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <CustomerPageHeader />
@@ -166,24 +249,27 @@ export default function CustomersPage() {
 
       <CustomerToolbar
         search={search}
-        status={status}
         sortBy={sortBy}
+        activeFilterCount={countActiveFilters(filters)}
         onSearchChange={setSearch}
-        onStatusChange={setStatus}
         onSortChange={setSortBy}
         onExport={handleExport}
+        onOpenFilters={() => setIsFilterPanelOpen(true)}
       />
 
       <CustomerTable
         customers={paginatedCustomers}
         isLoading={isLoading}
         onEdit={setSelectedCustomer}
+        onView={setViewingCustomer}
       />
 
       <CustomerPagination
         currentPage={currentPage}
         totalPages={totalPages}
+        pageSize={pageSize}
         onPageChange={setCurrentPage}
+        onPageSizeChange={setPageSize}
       />
 
       {selectedCustomer && (
@@ -192,6 +278,26 @@ export default function CustomersPage() {
           onClose={() => setSelectedCustomer(null)}
         />
       )}
+
+      {viewingCustomer && (
+        <CustomerDetailDrawer
+          customer={viewingCustomer}
+          onClose={() => setViewingCustomer(null)}
+          onEdit={(customer) => {
+            setViewingCustomer(null);
+            setSelectedCustomer(customer);
+          }}
+          onDelete={handleDeleteFromDrawer}
+        />
+      )}
+
+      <FilterPanel
+        open={isFilterPanelOpen}
+        onClose={() => setIsFilterPanelOpen(false)}
+        companies={companies}
+        filters={filters}
+        onApply={setFilters}
+      />
     </div>
   );
 }

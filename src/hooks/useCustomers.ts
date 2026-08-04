@@ -7,5 +7,6 @@ export function useCustomers() {
   return useQuery<Customer[]>({
     queryKey: ["customers"],
     queryFn: customerService.getCustomers,
+    staleTime: 60 * 1000,
   });
 }

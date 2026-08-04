@@ -6,6 +6,7 @@ export const customerSchema = z.object({
   phone: z.string().min(10, "Phone is required"),
   company: z.string().min(2, "Company is required"),
   status: z.enum(["Active", "Inactive"]),
+  lastContact: z.string().min(1, "Last contact date is required"),
   notes: z.string().optional(),
 });
 
