@@ -120,6 +120,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    cursor: default;
   }
   body {
     @apply bg-background text-foreground;
@@ -127,4 +128,31 @@
   html {
     @apply font-sans;
   }
+  /* Restore correct cursors for interactive elements */
+  a,
+  button,
+  [role="button"],
+  label[for],
+  select,
+  summary {
+    cursor: pointer;
+  }
+  input,
+  textarea,
+  [contenteditable] {
+    cursor: text;
+  }
+  input[type="checkbox"],
+  input[type="radio"] {
+    cursor: pointer;
+  }
+  [disabled],
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+html,
+body {
+  font-family: var(--font-geist-sans), sans-serif;
 }
