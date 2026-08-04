@@ -9,7 +9,7 @@ A modern Customer Relationship Management (CRM) Dashboard built with Next.js, Ty
 **Live URL:** Add your Vercel link here
 
 Example:
-https://your-project.vercel.app
+https://advanced-crm-dashboard-eight.vercel.app/
 
 ---
 
@@ -18,7 +18,7 @@ https://your-project.vercel.app
 Add your GitHub repository link here.
 
 Example:
-https://github.com/your-username/advanced-crm-dashboard
+https://github.com/venkateshmacherla/advanced-crm-dashboard
 
 ---
 
