@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 
 import SidebarItem from "./sidebar-item";
 import { navigation } from "@/constants/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface AppSidebarProps {
   mobileOpen?: boolean;
@@ -29,6 +30,19 @@ export default function AppSidebar({ mobileOpen, onClose }: AppSidebarProps) {
             <X size={20} />
           </button>
         )}
+      </div>
+
+      <div className="flex items-center gap-3 border-b border-slate-800 px-6 py-4">
+        <Avatar className="ring-1 ring-slate-700">
+          <AvatarFallback className="bg-blue-500/20 font-semibold text-blue-400">
+            AD
+          </AvatarFallback>
+        </Avatar>
+
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-white">Admin User</p>
+          <p className="truncate text-xs text-slate-500">admin@crm.com</p>
+        </div>
       </div>
 
       <nav className="flex-1 space-y-2 p-4">
