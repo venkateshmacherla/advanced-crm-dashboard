@@ -1,10 +1,15 @@
 "use client";
 
-import { Bell, Menu, UserCircle2 } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 interface AppHeaderProps {
   onMenuClick?: () => void;
 }
+
+// Static for now — swap for the authenticated user once auth exists.
+const CURRENT_USER = { name: "Admin User", email: "admin@crm.com" };
 
 export default function AppHeader({ onMenuClick }: AppHeaderProps) {
   return (
@@ -30,12 +35,18 @@ export default function AppHeader({ onMenuClick }: AppHeaderProps) {
         </button>
 
         <div className="flex items-center gap-2">
-          <UserCircle2 size={34} className="text-slate-300" />
+          <Avatar className="ring-1 ring-slate-700">
+            <AvatarFallback className="bg-blue-500/20 font-semibold text-blue-400">
+              AD
+            </AvatarFallback>
+          </Avatar>
 
           <div className="hidden sm:block">
-            <p className="text-sm font-medium text-white">Admin</p>
+            <p className="text-sm font-medium text-white">
+              {CURRENT_USER.name}
+            </p>
 
-            <p className="text-xs text-slate-400">admin@crm.com</p>
+            <p className="text-xs text-slate-400">{CURRENT_USER.email}</p>
           </div>
         </div>
       </div>

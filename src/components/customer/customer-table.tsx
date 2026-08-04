@@ -11,6 +11,7 @@ import {
 
 import CustomerEmptyState from "./customer-empty-state";
 import CustomerStatusBadge from "./customer-status-badge";
+import CustomerAvatar from "./customer-avatar";
 
 import { useDeleteCustomer } from "@/hooks/useCustomerMutations";
 import { Customer } from "@/types/customer";
@@ -80,7 +81,12 @@ export default function CustomerTable({
             >
               <TableCell>{index + 1}</TableCell>
 
-              <TableCell className="font-medium">{customer.name}</TableCell>
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-3">
+                  <CustomerAvatar name={customer.name} size="sm" />
+                  {customer.name}
+                </div>
+              </TableCell>
 
               <TableCell>{customer.email}</TableCell>
 
