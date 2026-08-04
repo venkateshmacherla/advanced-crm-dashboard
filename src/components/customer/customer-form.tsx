@@ -17,6 +17,9 @@ import {
 } from "@/hooks/useCustomerMutations";
 import { Customer } from "@/types/customer";
 
+import { useCustomers } from "@/hooks/useCustomers";
+import { toast } from "sonner";
+
 interface CustomerFormProps {
   customer?: Customer | null;
   onClose: () => void;
@@ -25,6 +28,8 @@ interface CustomerFormProps {
 export default function CustomerForm({ customer, onClose }: CustomerFormProps) {
   const addCustomer = useAddCustomer();
   const updateCustomer = useUpdateCustomer();
+
+  const { data: customers = [] } = useCustomers();
 
   const {
     register,
@@ -56,6 +61,23 @@ export default function CustomerForm({ customer, onClose }: CustomerFormProps) {
     isSubmitting || addCustomer.isPending || updateCustomer.isPending;
 
   const onSubmit = async (data: CustomerFormData) => {
+    const duplicateCustomer = customers.find(
+      (item) =>
+        item.id !== customer?.id &&
+        (item.email.toLowerCase() === data.email.toLowerCase() ||
+          item.phone === data.phone),
+    );
+
+    if (duplicateCustomer) {
+      if (duplicateCustomer.email.toLowerCase() === data.email.toLowerCase()) {
+        toast.error("Customer with this email already exists.");
+      } else {
+        toast.error("Customer with this phone number already exists.");
+      }
+
+      return;
+    }
+
     try {
       if (customer) {
         await updateCustomer.mutateAsync({
@@ -80,7 +102,7 @@ export default function CustomerForm({ customer, onClose }: CustomerFormProps) {
 
       onClose();
     } catch {
-      // Errors are already surfaced via toast in the mutation hooks.
+      // Errors are already handled by mutation hooks.
     }
   };
 
